@@ -16,6 +16,7 @@
 #include "debug_internal.h"
 #include "mbedtls/error.h"
 #include "mbedtls/platform.h"
+#include "mbedtls/q_masqds.h"
 
 #include "ssl_misc.h"
 #include "ssl_tls13_keys.h"
@@ -1522,6 +1523,21 @@ static int ssl_tls13_key_schedule_stage_handshake(mbedtls_ssl_context *ssl)
 
             handshake->xxdh_psa_privkey = MBEDTLS_SVC_KEY_ID_INIT;
 #endif /* PSA_WANT_ALG_ECDH || PSA_WANT_ALG_FFDH */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+        } else
+        if (mbedtls_ssl_tls13_named_group_is_masq_kem(handshake->offered_group_id)) {
+            shared_secret_len = 32;
+            shared_secret = mbedtls_calloc(1, shared_secret_len);
+            if (shared_secret == NULL) {
+                return MBEDTLS_ERR_SSL_ALLOC_FAILED;
+            }
+            if (handshake->qpkem_server_client == 1) {
+                ret = masqkem_decaps(shared_secret, handshake);
+            } else {
+                memcpy(shared_secret, handshake->qpkem_shared_secret, 32);
+            }
+            masqkem_destroy_key(handshake);
+#endif
         } else {
             MBEDTLS_SSL_DEBUG_MSG(1, ("Group not supported."));
             return MBEDTLS_ERR_SSL_FEATURE_UNAVAILABLE;

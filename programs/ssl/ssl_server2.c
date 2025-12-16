@@ -70,7 +70,7 @@ int main(void)
 #define DFL_DEBUG_LEVEL         0
 #define DFL_NBIO                0
 #define DFL_EVENT               0
-#define DFL_READ_TIMEOUT        0
+#define DFL_READ_TIMEOUT        3000
 #define DFL_EXP_LABEL           NULL
 #define DFL_EXP_LEN             20
 #define DFL_CA_FILE             ""
@@ -2540,6 +2540,24 @@ usage:
                 sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_RSA_PKCS1_SHA1;
             } else if (strcmp(q, "ecdsa_sha1") == 0) {
                 sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_ECDSA_SHA1;
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+            } else if (strcmp(q, "qghppkds1") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_GHPPKDS1;
+            } else if (strcmp(q, "qghppkds3") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_GHPPKDS3;
+            } else if (strcmp(q, "qghppkds5") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_GHPPKDS5;
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+            } else if (strcmp(q, "mldsa44") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_MLDSA44;
+            } else if (strcmp(q, "mldsa65") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_MLDSA65;
+            } else if (strcmp(q, "mldsa87") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_MLDSA87;
+#endif
+#endif
             } else {
                 ret = -1;
                 mbedtls_printf("unknown signature algorithm \"%s\"\n", q);
@@ -2698,6 +2716,24 @@ usage:
         key_cert_init2 == 0 &&
         strcmp(opt.crt_file2, "none") != 0 &&
         strcmp(opt.key_file2, "none") != 0) {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+        if ((ret = mbedtls_x509_crt_parse(&srvcert,
+                                          (const unsigned char *) mbedtls_test_srv_crt_masq,
+                                          mbedtls_test_srv_crt_masq_len)) != 0) {
+            mbedtls_printf(" F failed\n  !  mbedtls_x509_crt_parse returned -0x%x\n\n",
+                           (unsigned int) -ret);
+            goto exit;
+        }
+        if ((ret = mbedtls_pk_parse_key(&pkey,
+                                        (const unsigned char *) mbedtls_test_srv_key_masq,
+                                        mbedtls_test_srv_key_masq_len, NULL, 0,
+                                        rng_get, &rng)) != 0) {
+            mbedtls_printf(" F1 failed\n  !  mbedtls_pk_parse_key returned -0x%x\n\n",
+                           (unsigned int) -ret);
+            goto exit;
+        }
+        key_cert_init = 2;
+#else
 #if defined(MBEDTLS_RSA_C)
         if ((ret = mbedtls_x509_crt_parse(&srvcert,
                                           (const unsigned char *) mbedtls_test_srv_crt_rsa,
@@ -2734,6 +2770,7 @@ usage:
         }
         key_cert_init2 = 2;
 #endif /* MBEDTLS_PK_CAN_ECDSA_SIGN */
+#endif
     }
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
@@ -3830,7 +3867,7 @@ data_exchange:
 
                 /* End of message should be detected according to the syntax of the
                  * application protocol (eg HTTP), just use a dummy test here. */
-                if (buf[len - 1] == '\n') {
+                if (buf[len - 1] == '\n' || buf[len - 1] == 0xaa) {
                     terminated = 1;
                 }
             } else {
@@ -3977,6 +4014,7 @@ data_exchange:
     len = sprintf((char *) buf, HTTP_RESPONSE,
                   mbedtls_ssl_get_ciphersuite(&ssl));
 
+                  
     /* Add padding to the response to reach opt.response_size in length */
     if (opt.response_size != DFL_RESPONSE_SIZE &&
         len < opt.response_size) {

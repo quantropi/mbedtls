@@ -14,6 +14,7 @@
 #include "debug_internal.h"
 #include "mbedtls/error.h"
 #include "mbedtls/platform.h"
+#include "mbedtls/q_masqds.h"
 
 #include "ssl_misc.h"
 #include "ssl_client.h"
@@ -197,6 +198,12 @@ static int ssl_tls13_reset_key_share(mbedtls_ssl_context *ssl)
         ssl->handshake->xxdh_psa_privkey = MBEDTLS_SVC_KEY_ID_INIT;
         return 0;
     } else
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_ssl_tls13_named_group_is_masq_kem(group_id)) {
+        masqkem_destroy_key(ssl->handshake);
+        return 0;
+    } else
+#endif
 #endif /* MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_SOME_EPHEMERAL_ENABLED */
     if (0 /* other KEMs? */) {
         /* Do something */
@@ -238,7 +245,13 @@ static int ssl_tls13_get_default_group_id(mbedtls_ssl_context *ssl,
             return 0;
         }
 #endif
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_ssl_tls13_named_group_is_masq_kem(*group_list)) {
+            *group_id = *group_list;
+            return 0;
+        }
     }
+#endif
 #else
     ((void) ssl);
     ((void) group_id);
@@ -287,7 +300,11 @@ static int ssl_tls13_write_key_share_ext(mbedtls_ssl_context *ssl,
     /* HRR could already have requested something else. */
     group_id = ssl->handshake->offered_group_id;
     if (!mbedtls_ssl_tls13_named_group_is_ecdhe(group_id) &&
-        !mbedtls_ssl_tls13_named_group_is_ffdh(group_id)) {
+        !mbedtls_ssl_tls13_named_group_is_ffdh(group_id)
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+           && !mbedtls_ssl_tls13_named_group_is_masq_kem(group_id)
+#endif
+        ) {
         MBEDTLS_SSL_PROC_CHK(ssl_tls13_get_default_group_id(ssl,
                                                             &group_id));
     }
@@ -329,6 +346,31 @@ static int ssl_tls13_write_key_share_ext(mbedtls_ssl_context *ssl,
         MBEDTLS_PUT_UINT16_BE(key_exchange_len, group, 2);
     } else
 #endif /* PSA_WANT_ALG_ECDH || PSA_WANT_ALG_FFDH */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_ssl_tls13_named_group_is_masq_kem(group_id)) {
+        /* Pointer to group */
+        unsigned char *group = p;
+        size_t key_exchange_len = 0;
+
+        ssl->handshake->qpkem_server_client = 1;
+        /* Check there is space for header of KeyShareEntry
+         * - group                  (2 bytes)
+         * - key_exchange_length    (2 bytes)
+         */
+        MBEDTLS_SSL_CHK_BUF_PTR(p, end, 4);
+        p += 4;
+        ret = mbedtls_ssl_tls13_generate_and_write_qpkem_key_exchange(ssl, group_id, p, end, &key_exchange_len);
+        p += key_exchange_len;
+        if (ret != 0) {
+            return ret;
+        }
+
+        /* Write group */
+        MBEDTLS_PUT_UINT16_BE(group_id, group, 0);
+        /* Write key_exchange_length */
+        MBEDTLS_PUT_UINT16_BE(key_exchange_len, group, 2);
+    } else
+#endif
     if (0 /* other KEMs? */) {
         /* Do something */
     } else {
@@ -421,8 +463,13 @@ static int ssl_tls13_parse_hrr_key_share_ext(mbedtls_ssl_context *ssl,
             break;
         }
 #endif /* PSA_WANT_ALG_FFDH */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+        if (mbedtls_ssl_tls13_named_group_is_masq_kem(*group_list)) {
+            found = 1;
+            break;
+        }
     }
-
+#endif
     /* Client MUST verify that the selected_group field does not
      * correspond to a group which was provided in the "key_share"
      * extension in the original ClientHello. If the server sent an
@@ -501,6 +548,16 @@ static int ssl_tls13_parse_key_share_ext(mbedtls_ssl_context *ssl,
         }
     } else
 #endif /* MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_SOME_EPHEMERAL_ENABLED */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_ssl_tls13_named_group_is_masq_kem(group)) {
+        MBEDTLS_SSL_DEBUG_MSG(2,
+                              ("DHE group name: %s", mbedtls_ssl_named_group_to_str(group)));
+        ret = mbedtls_ssl_tls13_read_public_qpkem_share(ssl, p, end - p);
+        if (ret != 0) {
+            return ret;
+        }
+    } else
+#endif
     if (0 /* other KEMs? */) {
         /* Do something */
     } else {

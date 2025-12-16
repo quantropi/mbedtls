@@ -378,6 +378,36 @@ typedef struct {
 
 static const oid_sig_alg_t oid_sig_alg[] =
 {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_QGHPPKDS1,        "qghppkds1",           "QGHPPKDS level1"),
+        MBEDTLS_MD_SHA256,   MBEDTLS_PK_MASQDS1,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_QGHPPKDS3,        "qghppkds3",           "QGHPPKDS level3"),
+        MBEDTLS_MD_SHA256,   MBEDTLS_PK_MASQDS3,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_QGHPPKDS5,        "qghppkds5",           "QGHPPKDS level5"),
+        MBEDTLS_MD_SHA256,   MBEDTLS_PK_MASQDS5,
+    },
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_MLDSA44,        "mldsa44",           "MLDSA level1"),
+        MBEDTLS_MD_SHA256,   MBEDTLS_PK_MASQ_MLDSA44,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_MLDSA65,        "mldsa65",           "MLDSA level3"),
+        MBEDTLS_MD_SHA256,   MBEDTLS_PK_MASQ_MLDSA65,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_MLDSA87,        "mldsa87",           "MLDSA level5"),
+        MBEDTLS_MD_SHA256,   MBEDTLS_PK_MASQ_MLDSA87,
+    },
+#endif
+#endif
 #if defined(MBEDTLS_RSA_C)
 #if defined(MBEDTLS_MD_CAN_MD5)
     {
@@ -505,6 +535,36 @@ typedef struct {
 
 static const oid_pk_alg_t oid_pk_alg[] =
 {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_QGHPPKDS1,           "qghppkds1",    "QGHPPKDS level1"),
+        MBEDTLS_PK_MASQDS1,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_QGHPPKDS3,           "qghppkds3",    "QGHPPKDS level3"),
+        MBEDTLS_PK_MASQDS3,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_QGHPPKDS5,           "qghppkds5",    "QGHPPKDS level5"),
+        MBEDTLS_PK_MASQDS5,
+    },
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_MLDSA44,           "mldsa44",    "MLDSA level1"),
+        MBEDTLS_PK_MASQ_MLDSA44,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_MLDSA65,           "mldsa65",    "MLDSA level3"),
+        MBEDTLS_PK_MASQ_MLDSA65,
+    },
+    {
+        OID_DESCRIPTOR(MBEDTLS_OID_MLDSA87,           "mldsa87",    "MLDSA level5"),
+        MBEDTLS_PK_MASQ_MLDSA87,
+    },
+#endif
+#endif
     {
         OID_DESCRIPTOR(MBEDTLS_OID_PKCS1_RSA,           "rsaEncryption",    "RSA"),
         MBEDTLS_PK_RSA,

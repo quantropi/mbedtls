@@ -12,6 +12,65 @@ Compiler options can be set using conventional environment variables such as `CC
 
 We provide some non-standard configurations focused on specific use cases in the `configs/` directory. You can read more about those in `configs/README.txt`
 
+Configuration with Quantropi's PQC
+----------------------------------
+The `quantropi/mbedtls` repository is forked from open-source `mbedtls (v3.6.2)` and updated to support the Quantropi's QiSpace MASQ PQC algorithms (QGHPPKDS/QHPPKKEM) and NIST Standard PQC algorithms (MLDSA/MLKEM).
+
+The `QGHPPKDS` provides the Quantropi's PQC digital signature algorithm and the `QHPPKKEM` provides the Quantropi's PQC key exchange algorithm.
+
+The `MLDSA` provides the NIST standard PQC digital signature algorithm and the `MLKEM` provides the NIST standard PQC key exchange algorithm.
+
+Both `QGHPPKDS/QHPPKKEM` and `MLDSA/MLKEM` are built as static libraries and released with Quantropi's QiSpace MASQ SDK (version 2.0.0). 
+
+`quantropi/mbedtls` is updated to call Quantropi's MASQ SDK APIs to make the MbedTLS support PQC algorithms. Those changes are configurable. Configuration options are mentioned below.
+
+- To use the PQC algorithms, you need to change the config file `include/mbedtls/mbedtls_config.h`. 
+
+- To enable `QGHPPKDS` and `QHPPKKEM`, define `MBEDTLS_MASQ_PPK_C` in the config file.
+
+    ```
+    #define MBEDTLS_MASQ_PPK_C
+    ```
+
+- To enable `MLDSA` and `MLKEM`, define `MBEDTLS_MASQ_ML_C` in the config file.
+
+    ```
+    #define MBEDTLS_MASQ_ML_C
+    ```
+
+Build and Link against Quantropi's QiSpace MASQ SDK
+--------------------------------
+To build MbedTLS and different applications with Quantropi's PQC algorithms, you need to set some compiler options using `CFLAGS` and linker options using `LDFLAGS`.
+
+You will need to get the Quantropi's QiSpace MASQ SDK(v2.0.0) release and place it under `$(PWD)/libmasq` folder. You can update the `CFLAGS` and `LDFLAGS` with below before you build the MbedTLS.
+
+```
+CFLAGS+= -I$(PWD)/libmasq/ds/lib_mldsa -I$(PWD)/libmasq/ds/lib_ghppk -I$(PWD)/libmasq/kem/lib_mlkem -I$(PWD)/libmasq/kem/lib_hppk
+
+LDFLAGS+= -L$(PWD)/libmasq/ds/lib_ghppk -L$(PWD)/libmasq/ds/lib_mldsa -L$(PWD)/libmasq/kem/lib_hppk -L$(PWD)/libmasq/kem/lib_mlkem -lmasq_ds_mldsa-$(LIBNAME_SUFFIX) -lmasq_ds_ghppk-$(LIBNAME_SUFFIX) -lmasq_kem_mlkem-$(LIBNAME_SUFFIX) -lmasq_kem_hppk-$(LIBNAME_SUFFIX) 
+```
+
+The `LIBNAME_SUFFIX` is platform specific string. It will be one of the ARM platforms from the list below:
+```
+armgcc-cortexm33
+armgcc-cortexm4
+armgcc-cortexm7
+ostgcc-cortexa7
+pokygcc-aarch64
+rpigcc32-aarch32
+rpigcc64-aarch64
+xcgcc-samv71
+```
+or the `gcc-x64` for Ubuntu Host Platform
+
+Create certificates to use MbedTLS with Quantropi's MASQ SDK
+------------------------------------------------------------
+MbedTLS supports X.509 certificates. You will need to create X.509 certificates to use the SSL/TLS, X509 applications with MbedTLS. 
+
+To create `QGHPPKDS` or `MLDSA` certificates, you will need OpenSSL (at least v3.4+ for MLDSA/MLKEM) with `qispace_provider` or `oqsprovider`.
+
+Please contact Quantropi to get the OpenSSL Providers.
+
 Documentation
 -------------
 

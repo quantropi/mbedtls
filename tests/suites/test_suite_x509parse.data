@@ -3439,3 +3439,51 @@ x509_crt_parse_authoritykeyid:"../framework/data_files/authorityKeyId_subjectKey
 X509 CRT parse Authority Key Id - Wrong Issuer sequence
 depends_on:MBEDTLS_MD_CAN_MD5:MBEDTLS_RSA_C
 x509_crt_parse_authoritykeyid:"../framework/data_files/clusterfuzz-testcase-minimized-fuzz_x509crt-6666050834661376.crt.der":"":"":"":MBEDTLS_ERR_X509_INVALID_EXTENSIONS+MBEDTLS_ERR_ASN1_OUT_OF_DATA
+
+X509 CRT information QGHPPKDS5
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_PPK_C
+x509_cert_info:"qcerts/qghppkds5/server.crt":"cert. version     \: 1\nserial number     \: 3C\:37\:57\:C6\:B2\:01\:6E\:7E\:96\:0D\:85\:AB\:68\:CE\:6C\:19\:1B\:0C\:B4\:9E\nissuer name       \: CN=Root\nsubject name      \: CN=server 172.27.38.6\nissued  on        \: 2025-03-11 15\:28\:58\nexpires on        \: 2035-03-09 15\:28\:58\nsigned using      \: QGHPPKDS level5"
+
+X509 CRT information QGHPPKDS3
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_PPK_C
+x509_cert_info:"qcerts/qghppkds3/server.crt":"cert. version     \: 1\nserial number     \: 37\:43\:C8\:5D\:46\:48\:81\:10\:40\:C9\:5B\:52\:DA\:C6\:FE\:24\:1E\:FC\:26\:6C\nissuer name       \: CN=Root\nsubject name      \: CN=server 172.27.38.6\nissued  on        \: 2025-03-11 15\:29\:15\nexpires on        \: 2035-03-09 15\:29\:15\nsigned using      \: QGHPPKDS level3"
+
+X509 CRT information QGHPPKDS1
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_PPK_C
+x509_cert_info:"qcerts/qghppkds1/server.crt":"cert. version     \: 1\nserial number     \: 0B\:C6\:D0\:29\:A6\:C5\:A3\:70\:6D\:BA\:7D\:CA\:87\:BA\:BC\:73\:B9\:33\:CC\:16\nissuer name       \: CN=Root\nsubject name      \: CN=server 172.27.38.6\nissued  on        \: 2025-03-11 15\:29\:29\nexpires on        \: 2035-03-09 15\:29\:29\nsigned using      \: QGHPPKDS level1"
+
+X509 CRT information Mldsa87
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_ML_C
+x509_cert_info:"qcerts/mldsa87/server.crt":"cert. version     \: 1\nserial number     \: 1B\nissuer name       \: CN=Root\nsubject name      \: CN=server 172.27.38.6\nissued  on        \: 2025-03-11 15\:28\:22\nexpires on        \: 2035-03-09 15\:28\:22\nsigned using      \: mldsa87"
+
+X509 CRT information Mldsa65
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_ML_C
+x509_cert_info:"qcerts/mldsa65/server.crt":"cert. version     \: 1\nserial number     \: 4E\nissuer name       \: CN=Root\nsubject name      \: CN=server 172.27.38.6\nissued  on        \: 2025-03-11 15\:28\:00\nexpires on        \: 2035-03-09 15\:28\:00\nsigned using      \: mldsa65"
+
+X509 CRT information Mldsa44
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_ML_C
+x509_cert_info:"qcerts/mldsa44/server.crt":"cert. version     \: 1\nserial number     \: 6E\nissuer name       \: CN=Root\nsubject name      \: CN=server 172.27.38.6\nissued  on        \: 2025-03-11 15\:27\:12\nexpires on        \: 2035-03-09 15\:27\:12\nsigned using      \: mldsa44"
+
+X509 File parse QGHPPKDS5
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_PPK_C
+mbedtls_x509_crt_parse_file:"qcerts/qghppkds5/client.crt":0:1
+
+X509 File parse QGHPPKDS3
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_PPK_C
+mbedtls_x509_crt_parse_file:"qcerts/qghppkds3/client.crt":0:1
+
+X509 File parse QGHPPKDS1
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_PPK_C
+mbedtls_x509_crt_parse_file:"qcerts/qghppkds1/client.crt":0:1
+
+X509 File parse Mldsa87
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_ML_C
+mbedtls_x509_crt_parse_file:"qcerts/mldsa87/client.crt":0:1
+
+X509 File parse Mldsa65
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_ML_C
+mbedtls_x509_crt_parse_file:"qcerts/mldsa65/client.crt":0:1
+
+X509 File parse Mldsa44
+depends_on:MBEDTLS_PEM_PARSE_C:MBEDTLS_MASQ_ML_C
+mbedtls_x509_crt_parse_file:"qcerts/mldsa44/client.crt":0:1

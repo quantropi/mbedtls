@@ -150,6 +150,9 @@ OBJS_CRYPTO= \
 	     pk.o \
 	     pk_ecc.o \
 	     pk_wrap.o \
+	     pk_wrap_masq_ml.o \
+	     pk_wrap_masq_ppk.o \
+	     ssl_tls13_kem_masq.o \
 	     pkcs12.o \
 	     pkcs5.o \
 	     pkparse.o \
@@ -184,6 +187,7 @@ OBJS_CRYPTO= \
 	     timing.o \
 	     version.o \
 	     version_features.o \
+		 masq_bn_util_mbedtls.o \
 	     # This line is intentionally left blank
 
 include ../3rdparty/Makefile.inc

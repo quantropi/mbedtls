@@ -104,6 +104,19 @@ typedef struct {
 } mbedtls_rsa_alt_context;
 #endif
 
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+extern const mbedtls_pk_info_t mbedtls_masqds1_info;
+extern const mbedtls_pk_info_t mbedtls_masqds3_info;
+extern const mbedtls_pk_info_t mbedtls_masqds5_info;
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+extern const mbedtls_pk_info_t mbedtls_masq_mldsa44_info;
+extern const mbedtls_pk_info_t mbedtls_masq_mldsa65_info;
+extern const mbedtls_pk_info_t mbedtls_masq_mldsa87_info;
+#endif
+#endif
+
 #if defined(MBEDTLS_RSA_C)
 extern const mbedtls_pk_info_t mbedtls_rsa_info;
 #endif

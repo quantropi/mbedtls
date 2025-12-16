@@ -350,7 +350,7 @@ uint32_t mbedtls_ssl_get_extension_mask(unsigned int extension_type);
 /* Maximum size in bytes of list in supported elliptic curve ext., RFC 4492 */
 #define MBEDTLS_SSL_MAX_CURVE_LIST_LEN         65535
 
-#define MBEDTLS_RECEIVED_SIG_ALGS_SIZE         20
+#define MBEDTLS_RECEIVED_SIG_ALGS_SIZE         80
 
 #if defined(MBEDTLS_SSL_HANDSHAKE_WITH_CERT_ENABLED)
 
@@ -791,6 +791,19 @@ struct mbedtls_ssl_handshake_params {
     unsigned char xxdh_psa_peerkey[PSA_EXPORT_PUBLIC_KEY_MAX_SIZE];
     size_t xxdh_psa_peerkey_len;
 #endif /* MBEDTLS_KEY_EXCHANGE_SOME_XXDH_PSA_ANY_ENABLED */
+
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    void * qpkem_handle;
+    int qpkem_type;     // 0: mlkem, 1: hppk
+    int qpkem_server_client;
+    uint8_t qpkem_shared_secret[32];
+    uint8_t * qpkem_privkey;
+    uint16_t qpkem_privkey_len;
+    uint8_t * qpkem_pubkey;
+    uint16_t qpkem_pubkey_len;
+    uint8_t * qpkem_peerkey;
+    uint16_t qpkem_peerkey_len;
+#endif
 
 #if defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
@@ -2223,6 +2236,14 @@ int mbedtls_ssl_tls13_generate_and_write_xxdh_key_exchange(
     size_t *out_len);
 #endif /* PSA_WANT_ALG_ECDH || PSA_WANT_ALG_FFDH */
 
+MBEDTLS_CHECK_RETURN_CRITICAL
+int mbedtls_ssl_tls13_generate_and_write_qpkem_key_exchange(
+    mbedtls_ssl_context *ssl,
+    uint16_t named_group,
+    unsigned char *buf,
+    unsigned char *end,
+    size_t *out_len);
+
 #if defined(MBEDTLS_SSL_EARLY_DATA)
 int mbedtls_ssl_tls13_write_early_data_ext(mbedtls_ssl_context *ssl,
                                            int in_new_session_ticket,
@@ -2374,6 +2395,18 @@ static inline int mbedtls_ssl_tls13_named_group_is_ffdh(uint16_t named_group)
            named_group <= MBEDTLS_SSL_IANA_TLS_GROUP_FFDHE8192;
 }
 
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+static inline int mbedtls_ssl_tls13_named_group_is_masq_kem(uint16_t named_group)
+{
+    return ( named_group == MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM512 ||
+              named_group == MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM768 ||
+               named_group == MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM1024 ||
+             named_group == MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM1 ||
+              named_group == MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM3 ||
+               named_group == MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM5 );
+}
+#endif
+
 static inline int mbedtls_ssl_named_group_is_offered(
     const mbedtls_ssl_context *ssl, uint16_t named_group)
 {
@@ -2404,6 +2437,11 @@ static inline int mbedtls_ssl_named_group_is_supported(uint16_t named_group)
 #endif
 #if defined(PSA_WANT_ALG_FFDH)
     if (mbedtls_ssl_tls13_named_group_is_ffdh(named_group)) {
+        return 1;
+    }
+#endif
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_ssl_tls13_named_group_is_masq_kem(named_group)) {
         return 1;
     }
 #endif
@@ -2467,6 +2505,19 @@ static inline int mbedtls_ssl_tls13_sig_alg_for_cert_verify_is_supported(
     const uint16_t sig_alg)
 {
     switch (sig_alg) {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+        case MBEDTLS_TLS1_3_SIG_GHPPKDS1:
+        case MBEDTLS_TLS1_3_SIG_GHPPKDS3:
+        case MBEDTLS_TLS1_3_SIG_GHPPKDS5:
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+        case MBEDTLS_TLS1_3_SIG_MLDSA44:
+        case MBEDTLS_TLS1_3_SIG_MLDSA65:
+        case MBEDTLS_TLS1_3_SIG_MLDSA87:
+#endif
+            break;
+#endif
 #if defined(MBEDTLS_PK_CAN_ECDSA_SOME)
 #if defined(PSA_WANT_ALG_SHA_256) && defined(PSA_WANT_ECC_SECP_R1_256)
         case MBEDTLS_TLS1_3_SIG_ECDSA_SECP256R1_SHA256:
@@ -2561,6 +2612,36 @@ static inline int mbedtls_ssl_get_pk_type_and_md_alg_from_sig_alg(
     }
 
     switch (sig_alg) {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+        case MBEDTLS_TLS1_3_SIG_GHPPKDS1:
+            *md_alg = MBEDTLS_MD_NONE;
+            *pk_type = MBEDTLS_PK_MASQDS1;
+            break;
+        case MBEDTLS_TLS1_3_SIG_GHPPKDS3:
+            *md_alg = MBEDTLS_MD_NONE;
+            *pk_type = MBEDTLS_PK_MASQDS3;
+            break;
+        case MBEDTLS_TLS1_3_SIG_GHPPKDS5:
+            *md_alg = MBEDTLS_MD_NONE;
+            *pk_type = MBEDTLS_PK_MASQDS5;
+            break;
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+        case MBEDTLS_TLS1_3_SIG_MLDSA44:
+            *md_alg = MBEDTLS_MD_NONE;
+            *pk_type = MBEDTLS_PK_MASQ_MLDSA44;
+            break;
+        case MBEDTLS_TLS1_3_SIG_MLDSA65:
+            *md_alg = MBEDTLS_MD_NONE;
+            *pk_type = MBEDTLS_PK_MASQ_MLDSA65;
+            break;
+        case MBEDTLS_TLS1_3_SIG_MLDSA87:
+            *md_alg = MBEDTLS_MD_NONE;
+            *pk_type = MBEDTLS_PK_MASQ_MLDSA87;
+            break;
+#endif
+#endif
 #if defined(MBEDTLS_PKCS1_V21)
 #if defined(MBEDTLS_MD_CAN_SHA256)
         case MBEDTLS_TLS1_3_SIG_RSA_PSS_RSAE_SHA256:
@@ -2810,6 +2891,11 @@ int mbedtls_ssl_tls13_read_public_xxdhe_share(mbedtls_ssl_context *ssl,
                                               size_t buf_len);
 
 #endif /* PSA_WANT_ALG_ECDH || PSA_WANT_ALG_FFDH */
+
+MBEDTLS_CHECK_RETURN_CRITICAL
+int mbedtls_ssl_tls13_read_public_qpkem_share(mbedtls_ssl_context *ssl,
+                                              const unsigned char *buf,
+                                              size_t buf_len);
 
 static inline int mbedtls_ssl_tls13_cipher_suite_is_offered(
     mbedtls_ssl_context *ssl, int cipher_suite)

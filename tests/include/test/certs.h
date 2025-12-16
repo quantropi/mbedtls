@@ -93,6 +93,21 @@ extern const size_t mbedtls_test_ca_crt_rsa_sha256_len;
 extern const char mbedtls_test_ca_crt_rsa[];
 extern const size_t mbedtls_test_ca_crt_rsa_len;
 
+extern const char mbedtls_test_ca_crt_masq[];
+extern const size_t mbedtls_test_ca_crt_masq_len;
+extern const char mbedtls_test_srv_crt_masq[];
+extern const size_t mbedtls_test_srv_crt_masq_len;
+extern const char mbedtls_test_cli_crt_masq[];
+extern const size_t mbedtls_test_cli_crt_masq_len;
+
+extern const char mbedtls_test_ca_key_masq[];
+extern const size_t mbedtls_test_ca_key_masq_len;
+extern const char mbedtls_test_srv_key_masq[];
+extern const size_t mbedtls_test_srv_key_masq_len;
+extern const char mbedtls_test_cli_key_masq[];
+extern const size_t mbedtls_test_cli_key_masq_len;
+
+
 /* Config-dependent dispatch between EC and RSA
  * (RSA if enabled, otherwise EC) */
 

@@ -337,6 +337,18 @@
 #define MBEDTLS_OID_PKCS7_DIGESTED_DATA               MBEDTLS_OID_PKCS7 "\x05" /**< Content type is Digested Data OBJECT IDENTIFIER ::= {pkcs-7 5} */
 #define MBEDTLS_OID_PKCS7_ENCRYPTED_DATA              MBEDTLS_OID_PKCS7 "\x06" /**< Content type is Encrypted Data OBJECT IDENTIFIER ::= {pkcs-7 6} */
 
+
+/* GHPPKDS OIDs*/
+#define MBEDTLS_OID_QGHPPKDS1                     "\x2b\xce\x0f\x04\x01\x01"            // defined in qispace_prov.h as "1.3.9999.4.1.1"
+#define MBEDTLS_OID_QGHPPKDS3                     "\x2b\xce\x0f\x04\x01\x03"            // https://misc.daniel-marschall.de/asn.1/oid-converter/online.php
+#define MBEDTLS_OID_QGHPPKDS5                     "\x2b\xce\x0f\x04\x01\x05"
+
+
+/* MLDSA OIDs*/
+#define MBEDTLS_OID_MLDSA44                     "\x60\x86\x48\x01\x65\x03\x04\x03\x11"      // "2.16.840.1.101.3.4.3.17" remove 06 09
+#define MBEDTLS_OID_MLDSA65                     "\x60\x86\x48\x01\x65\x03\x04\x03\x12"      // "2.16.840.1.101.3.4.3.18"
+#define MBEDTLS_OID_MLDSA87                     "\x60\x86\x48\x01\x65\x03\x04\x03\x13"      // "2.16.840.1.101.3.4.3.19"
+
 /*
  * PKCS#8 OIDs
  */

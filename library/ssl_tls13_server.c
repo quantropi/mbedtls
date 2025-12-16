@@ -970,7 +970,18 @@ static int ssl_tls13_parse_key_shares_ext(mbedtls_ssl_context *ssl,
             if (ret != 0) {
                 return ret;
             }
-
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+        } else
+        if (mbedtls_ssl_tls13_named_group_is_masq_kem(group)) {
+            MBEDTLS_SSL_DEBUG_MSG(2, ("mlkem/qhppkkem group: %s (%04x)",
+                                      mbedtls_ssl_named_group_to_str(group),
+                                      group));
+            ret = mbedtls_ssl_tls13_read_public_qpkem_share(
+                ssl, key_exchange - 2, key_exchange_len + 2);
+            if (ret != 0) {
+                return ret;
+            }
+#endif
         } else {
             MBEDTLS_SSL_DEBUG_MSG(4, ("Unrecognized NamedGroup %u",
                                       (unsigned) group));
@@ -2105,6 +2116,18 @@ static int ssl_tls13_generate_and_write_key_share(mbedtls_ssl_context *ssl,
         }
     } else
 #endif /* MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_SOME_EPHEMERAL_ENABLED */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_ssl_tls13_named_group_is_masq_kem(named_group)) {
+        ret = mbedtls_ssl_tls13_generate_and_write_qpkem_key_exchange(
+            ssl, named_group, buf, end, out_len);
+        if (ret != 0) {
+            MBEDTLS_SSL_DEBUG_RET(
+                1, "mbedtls_ssl_tls13_generate_and_write_qpkem_key_exchange",
+                ret);
+            return ret;
+        }
+    } else
+#endif
     if (0 /* Other kinds of KEMs */) {
     } else {
         ((void) ssl);

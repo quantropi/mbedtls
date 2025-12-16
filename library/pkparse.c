@@ -20,6 +20,8 @@
 
 #include <string.h>
 
+#include "mbedtls/q_masqds.h"
+
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
 #include "mbedtls/psa_util.h"
 #include "psa/crypto.h"
@@ -583,6 +585,15 @@ int mbedtls_pk_parse_subpubkey(unsigned char **p, const unsigned char *end,
         }
     } else
 #endif /* MBEDTLS_PK_HAVE_ECC_KEYS */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (pk_alg == MBEDTLS_PK_MASQDS1 || pk_alg == MBEDTLS_PK_MASQDS3 || pk_alg == MBEDTLS_PK_MASQDS5 ||
+        pk_alg == MBEDTLS_PK_MASQ_MLDSA44 || pk_alg == MBEDTLS_PK_MASQ_MLDSA65|| pk_alg == MBEDTLS_PK_MASQ_MLDSA87 ) {
+        // quantropi masq public key
+        mbedtls_masqds_context *q_ctx = (mbedtls_masqds_context *)(pk->pk_ctx);
+        memcpy(q_ctx->pubkey, *p, q_ctx->pubkey_len);
+        *p = (unsigned char *)end;
+    } else
+#endif
     ret = MBEDTLS_ERR_PK_UNKNOWN_PK_ALG;
 
     if (ret == 0 && *p != end) {
@@ -841,6 +852,31 @@ static int pk_parse_key_pkcs8_unencrypted_der(
         }
     } else
 #endif /* MBEDTLS_PK_HAVE_ECC_KEYS */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#define OPENSSL_3_5_SIZE_AHEAD_KEY  42
+    if (pk_alg == MBEDTLS_PK_MASQDS1 || pk_alg == MBEDTLS_PK_MASQDS3 || pk_alg == MBEDTLS_PK_MASQDS5 ||
+        pk_alg == MBEDTLS_PK_MASQ_MLDSA44 || pk_alg == MBEDTLS_PK_MASQ_MLDSA65|| pk_alg == MBEDTLS_PK_MASQ_MLDSA87 ) {
+        // the encoded masq key here is asn1 OCTET STRING contains private kay together with public key
+        mbedtls_asn1_get_tag(&p, end, &len, MBEDTLS_ASN1_OCTET_STRING);
+        // quantropi masq private key
+        mbedtls_masqds_context *q_ctx = (mbedtls_masqds_context *)(pk->pk_ctx);
+        // for openssl 3.4 with oqsprovider and qispace provider, the p point to private key + public key
+        // for openssl 3.5 with mldsa self-contained, the p point to another asn1 sequence with following strcture
+        //      0x30 0x82, indicate asn1 sequence
+        //      0x04 0x20 <32 bytes data>, could be seed
+        //      0x04 0x82 <4 bytes length> <private key>
+        // we copy the private key only
+        if ((int32_t)len == q_ctx->prikey_len+q_ctx->pubkey_len) { // for oqsprovider and qispace_provider
+            memcpy(q_ctx->prikey, p, q_ctx->prikey_len);
+        } else if ((*p==0x30 && *(p+1)==0x82 && (int32_t)len==q_ctx->prikey_len+OPENSSL_3_5_SIZE_AHEAD_KEY) ) {// another sequence for openssl 3.5 key
+            memcpy(q_ctx->prikey, p+OPENSSL_3_5_SIZE_AHEAD_KEY, q_ctx->prikey_len);
+        }
+        else {
+            MBEDTLS_SSL_DEBUG_MSG_MASQ("ERROR: Cannot parse key data.");
+            return MBEDTLS_ERROR_ADD(MBEDTLS_ERR_PK_KEY_INVALID_FORMAT,MBEDTLS_ERR_ASN1_INVALID_DATA);
+        }
+    } else
+#endif
     return MBEDTLS_ERR_PK_UNKNOWN_PK_ALG;
 
     end = p + len;

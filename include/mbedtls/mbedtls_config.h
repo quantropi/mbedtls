@@ -3406,6 +3406,22 @@
 #define MBEDTLS_RSA_C
 
 /**
+ * \def MBEDTLS_MASQ_PPK_C
+ *
+ * Enable the MASQ qghppkds public-key cryptosystem
+ * and the MASQ qhppkkem key exchange cryptosystem
+ */
+//#define MBEDTLS_MASQ_PPK_C
+
+/**
+ * \def MBEDTLS_MASQ_ML_C
+ *
+ * Enable the MASQ mldsa public-key cryptosystem
+ * and the MASQ mlkem key exchange cryptosystem
+ */
+//#define MBEDTLS_MASQ_ML_C
+
+/**
  * \def MBEDTLS_SHA1_C
  *
  * Enable the SHA1 cryptographic hash algorithm.

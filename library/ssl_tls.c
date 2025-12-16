@@ -5691,6 +5691,16 @@ static const uint16_t ssl_preset_default_groups[] = {
     MBEDTLS_SSL_IANA_TLS_GROUP_FFDHE6144,
     MBEDTLS_SSL_IANA_TLS_GROUP_FFDHE8192,
 #endif
+#if defined(MBEDTLS_MASQ_ML_C)
+    MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM512,
+    MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM768,
+    MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM1024,
+#endif
+#if defined(MBEDTLS_MASQ_PPK_C)
+    MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM1,
+    MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM3,
+    MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM5,
+#endif
     MBEDTLS_SSL_IANA_TLS_GROUP_NONE
 };
 
@@ -5711,7 +5721,18 @@ static const int ssl_preset_suiteb_ciphersuites[] = {
  *   - ssl_preset_* is for TLS 1.3 only or hybrid TLS 1.3/1.2 handshakes.
  */
 static const uint16_t ssl_preset_default_sig_algs[] = {
-
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+    MBEDTLS_TLS1_3_SIG_GHPPKDS1,
+    MBEDTLS_TLS1_3_SIG_GHPPKDS3,
+    MBEDTLS_TLS1_3_SIG_GHPPKDS5,
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+    MBEDTLS_TLS1_3_SIG_MLDSA44,
+    MBEDTLS_TLS1_3_SIG_MLDSA65,
+    MBEDTLS_TLS1_3_SIG_MLDSA87,
+#endif
+#endif
 #if defined(MBEDTLS_KEY_EXCHANGE_ECDSA_CERT_REQ_ANY_ALLOWED_ENABLED) && \
     defined(MBEDTLS_MD_CAN_SHA256) && \
     defined(PSA_WANT_ECC_SECP_R1_256)
@@ -5806,7 +5827,18 @@ static const uint16_t ssl_tls12_preset_default_sig_algs[] = {
 
 /* NOTICE: see above */
 static const uint16_t ssl_preset_suiteb_sig_algs[] = {
-
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+    MBEDTLS_TLS1_3_SIG_GHPPKDS1,
+    MBEDTLS_TLS1_3_SIG_GHPPKDS3,
+    MBEDTLS_TLS1_3_SIG_GHPPKDS5,
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+    MBEDTLS_TLS1_3_SIG_MLDSA44,
+    MBEDTLS_TLS1_3_SIG_MLDSA65,
+    MBEDTLS_TLS1_3_SIG_MLDSA87,
+#endif
+#endif
 #if defined(MBEDTLS_KEY_EXCHANGE_ECDSA_CERT_REQ_ANY_ALLOWED_ENABLED) && \
     defined(MBEDTLS_MD_CAN_SHA256) && \
     defined(MBEDTLS_ECP_HAVE_SECP256R1)
@@ -6157,6 +6189,20 @@ void mbedtls_ssl_config_free(mbedtls_ssl_config *conf)
  */
 unsigned char mbedtls_ssl_sig_from_pk(mbedtls_pk_context *pk)
 {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (mbedtls_pk_can_do(pk, MBEDTLS_PK_MASQDS1))
+        return MBEDTLS_PK_MASQDS1;
+    if (mbedtls_pk_can_do(pk, MBEDTLS_PK_MASQDS3))
+        return MBEDTLS_PK_MASQDS3;
+    if (mbedtls_pk_can_do(pk, MBEDTLS_PK_MASQDS5))
+        return MBEDTLS_PK_MASQDS5;
+    if (mbedtls_pk_can_do(pk, MBEDTLS_PK_MASQ_MLDSA44))
+        return MBEDTLS_PK_MASQ_MLDSA44;
+    if (mbedtls_pk_can_do(pk, MBEDTLS_PK_MASQ_MLDSA65))
+        return MBEDTLS_PK_MASQ_MLDSA65;
+    if (mbedtls_pk_can_do(pk, MBEDTLS_PK_MASQ_MLDSA87))
+        return MBEDTLS_PK_MASQ_MLDSA87;
+#endif
 #if defined(MBEDTLS_RSA_C)
     if (mbedtls_pk_can_do(pk, MBEDTLS_PK_RSA)) {
         return MBEDTLS_SSL_SIG_RSA;

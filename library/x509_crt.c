@@ -238,7 +238,11 @@ static int x509_profile_check_key(const mbedtls_x509_crt_profile *profile,
         return -1;
     }
 #endif /* MBEDTLS_PK_HAVE_ECC_KEYS */
-
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (pk_alg == MBEDTLS_PK_MASQDS1 || pk_alg == MBEDTLS_PK_MASQDS3 || pk_alg == MBEDTLS_PK_MASQDS5 ||
+            pk_alg == MBEDTLS_PK_MASQ_MLDSA44 || pk_alg == MBEDTLS_PK_MASQ_MLDSA65 || pk_alg == MBEDTLS_PK_MASQ_MLDSA87 )
+        return 0;
+#endif
     return -1;
 }
 
@@ -1747,7 +1751,7 @@ static int x509_info_cert_policies(char **buf, size_t *size,
  * Return an informational string about the certificate.
  */
 #define BEFORE_COLON    18
-#define BC              "18"
+#define BC_STR              "18"
 int mbedtls_x509_crt_info(char *buf, size_t size, const char *prefix,
                           const mbedtls_x509_crt *crt)
 {
@@ -1813,7 +1817,7 @@ int mbedtls_x509_crt_info(char *buf, size_t size, const char *prefix,
         return ret;
     }
 
-    ret = mbedtls_snprintf(p, n, "\n%s%-" BC "s: %d bits", prefix, key_size_str,
+    ret = mbedtls_snprintf(p, n, "\n%s%-" BC_STR "s: %d bits", prefix, key_size_str,
                            (int) mbedtls_pk_get_bitlen(&crt->pk));
     MBEDTLS_X509_SAFE_SNPRINTF;
 
@@ -2127,6 +2131,21 @@ static int x509_crt_check_signature(const mbedtls_x509_crt *child,
 {
     size_t hash_len;
     unsigned char hash[MBEDTLS_MD_MAX_SIZE];
+
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (child->sig_pk == MBEDTLS_PK_MASQDS1 || child->sig_pk == MBEDTLS_PK_MASQDS3 || child->sig_pk == MBEDTLS_PK_MASQDS5 ||
+        child->sig_pk == MBEDTLS_PK_MASQ_MLDSA44 || child->sig_pk == MBEDTLS_PK_MASQ_MLDSA65 || child->sig_pk == MBEDTLS_PK_MASQ_MLDSA87 ) {
+       /* Skip expensive computation on obvious mismatch */
+        if (!mbedtls_pk_can_do(&parent->pk, child->sig_pk)) {
+            return -1;
+        }
+
+        return mbedtls_pk_verify_ext(child->sig_pk, child->sig_opts, &parent->pk,
+                                 child->sig_md, child->tbs.p, child->tbs.len,
+                                 child->sig.p, child->sig.len);
+
+    }
+#endif
 #if !defined(MBEDTLS_USE_PSA_CRYPTO)
     const mbedtls_md_info_t *md_info;
     md_info = mbedtls_md_info_from_type(child->sig_md);

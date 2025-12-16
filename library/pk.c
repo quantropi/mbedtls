@@ -110,6 +110,24 @@ void mbedtls_pk_restart_free(mbedtls_pk_restart_ctx *ctx)
 const mbedtls_pk_info_t *mbedtls_pk_info_from_type(mbedtls_pk_type_t pk_type)
 {
     switch (pk_type) {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+        case MBEDTLS_PK_MASQDS1:
+            return &mbedtls_masqds1_info;
+        case MBEDTLS_PK_MASQDS3:
+            return &mbedtls_masqds3_info;
+        case MBEDTLS_PK_MASQDS5:
+            return &mbedtls_masqds5_info;
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+        case MBEDTLS_PK_MASQ_MLDSA44:
+            return &mbedtls_masq_mldsa44_info;
+        case MBEDTLS_PK_MASQ_MLDSA65:
+            return &mbedtls_masq_mldsa65_info;
+        case MBEDTLS_PK_MASQ_MLDSA87:
+            return &mbedtls_masq_mldsa87_info;
+#endif
+#endif
 #if defined(MBEDTLS_RSA_C)
         case MBEDTLS_PK_RSA:
             return &mbedtls_rsa_info;

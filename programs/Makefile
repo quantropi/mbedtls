@@ -69,13 +69,13 @@ APPS = \
 	ssl/dtls_client \
 	ssl/dtls_server \
 	ssl/mini_client \
-	ssl/ssl_client1 \
 	ssl/ssl_client2 \
+	ssl/ssl_server2 \
+	ssl/ssl_client1 \
 	ssl/ssl_context_info \
 	ssl/ssl_fork_server \
 	ssl/ssl_mail_client \
 	ssl/ssl_server \
-	ssl/ssl_server2 \
 	test/benchmark \
 	test/metatest \
 	test/query_compile_time_config \
@@ -297,7 +297,7 @@ ssl/dtls_server$(EXEXT): ssl/dtls_server.c $(DEP)
 
 ssl/ssl_client1$(EXEXT): ssl/ssl_client1.c $(DEP)
 	echo "  CC    ssl/ssl_client1.c"
-	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) ssl/ssl_client1.c  $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
+	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) ssl/ssl_client1.c $(SSL_TEST_OBJECTS) $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 
 SSL_TEST_OBJECTS = test/query_config.o ssl/ssl_test_lib.o
 SSL_TEST_DEPS = $(SSL_TEST_OBJECTS) \
@@ -320,6 +320,7 @@ ssl/ssl_server$(EXEXT): ssl/ssl_server.c $(DEP)
 
 ssl/ssl_server2$(EXEXT): ssl/ssl_server2.c $(SSL_TEST_DEPS)
 	echo "  CC    ssl/ssl_server2.c"
+	echo $(CC) $(LOCAL_CFLAGS) $(CFLAGS) ssl/ssl_server2.c $(SSL_TEST_OBJECTS) $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) ssl/ssl_server2.c $(SSL_TEST_OBJECTS) $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 
 ssl/ssl_context_info$(EXEXT): ssl/ssl_context_info.c test/query_config.o $(FRAMEWORK)/tests/programs/query_config.h $(DEP)

@@ -735,6 +735,12 @@ static const char * const features[] = {
 #if defined(MBEDTLS_RSA_C)
     "RSA_C", //no-check-names
 #endif /* MBEDTLS_RSA_C */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    "MASQKEM_C", //no-check-names
+#endif /* MBEDTLS_MASQKEM_C */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    "MASQDS_C", //no-check-names
+#endif /* MBEDTLS_MASQDS_C */
 #if defined(MBEDTLS_SHA1_C)
     "SHA1_C", //no-check-names
 #endif /* MBEDTLS_SHA1_C */

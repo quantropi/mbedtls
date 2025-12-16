@@ -98,6 +98,18 @@ const char *mbedtls_ssl_sig_alg_to_str( uint16_t in )
         return "rsa_pkcs1_sha1";
     case MBEDTLS_TLS1_3_SIG_ECDSA_SHA1:
         return "ecdsa_sha1";
+    case MBEDTLS_TLS1_3_SIG_GHPPKDS1:
+        return "ghppkds1";
+    case MBEDTLS_TLS1_3_SIG_GHPPKDS3:
+        return "ghppkds3";
+    case MBEDTLS_TLS1_3_SIG_GHPPKDS5:
+        return "ghppkds5";
+    case MBEDTLS_TLS1_3_SIG_MLDSA44:
+        return "mldsa44";
+    case MBEDTLS_TLS1_3_SIG_MLDSA65:
+        return "mldsa65";
+    case MBEDTLS_TLS1_3_SIG_MLDSA87:
+        return "mldsa87";
     case MBEDTLS_TLS1_3_SIG_NONE:
         return "none";
     };

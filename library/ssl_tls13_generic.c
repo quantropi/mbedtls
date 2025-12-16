@@ -301,6 +301,16 @@ static int ssl_tls13_parse_certificate_verify(mbedtls_ssl_context *ssl,
     p += 2;
     MBEDTLS_SSL_CHK_BUF_READ_PTR(p, end, signature_len);
 
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    if (sig_alg == MBEDTLS_PK_MASQDS1 || sig_alg == MBEDTLS_PK_MASQDS3 || sig_alg == MBEDTLS_PK_MASQDS5 ||
+        sig_alg == MBEDTLS_PK_MASQ_MLDSA44 || sig_alg == MBEDTLS_PK_MASQ_MLDSA65|| sig_alg == MBEDTLS_PK_MASQ_MLDSA87 ) {
+        return mbedtls_pk_verify_ext(sig_alg, options,
+                                     &ssl->session_negotiate->peer_cert->pk,
+                                     md_alg, verify_buffer, verify_buffer_len,
+                                     p, signature_len);
+    }
+#endif
+
     status = psa_hash_compute(hash_alg,
                               verify_buffer,
                               verify_buffer_len,
@@ -888,6 +898,30 @@ int mbedtls_ssl_tls13_check_sig_alg_cert_key_match(uint16_t sig_alg,
             }
             break;
 
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+        case MBEDTLS_PK_MASQDS1:
+        case MBEDTLS_PK_MASQDS3:
+        case MBEDTLS_PK_MASQDS5:
+        case MBEDTLS_PK_MASQ_MLDSA44:
+        case MBEDTLS_PK_MASQ_MLDSA65:
+        case MBEDTLS_PK_MASQ_MLDSA87:
+            switch (sig_alg) {
+#if defined(MBEDTLS_MASQ_PPK_C)
+                case MBEDTLS_TLS1_3_SIG_GHPPKDS1:
+                case MBEDTLS_TLS1_3_SIG_GHPPKDS3:
+                case MBEDTLS_TLS1_3_SIG_GHPPKDS5:
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+                case MBEDTLS_TLS1_3_SIG_MLDSA44:
+                case MBEDTLS_TLS1_3_SIG_MLDSA65:
+                case MBEDTLS_TLS1_3_SIG_MLDSA87:
+ #endif
+                    return 1;
+                default:
+                    break;
+            }
+            break;
+#endif
         default:
             break;
     }
@@ -972,6 +1006,27 @@ static int ssl_tls13_write_certificate_verify_body(mbedtls_ssl_context *ssl,
             return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
         }
 
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+        if (*sig_alg == MBEDTLS_TLS1_3_SIG_GHPPKDS1 || *sig_alg == MBEDTLS_TLS1_3_SIG_GHPPKDS3 || *sig_alg == MBEDTLS_TLS1_3_SIG_GHPPKDS5 ||
+            *sig_alg == MBEDTLS_TLS1_3_SIG_MLDSA44 || *sig_alg == MBEDTLS_TLS1_3_SIG_MLDSA65 || *sig_alg == MBEDTLS_TLS1_3_SIG_MLDSA87 ) {
+            if ((ret = mbedtls_pk_sign_ext(pk_type, own_key,
+                                       md_alg, verify_buffer, verify_buffer_len,
+                                       p + 4, (size_t) (end - (p + 4)), &signature_len,
+                                       ssl->conf->f_rng, ssl->conf->p_rng)) != 0) {
+                MBEDTLS_SSL_DEBUG_MSG(2, ("CertificateVerify signature failed with %s",
+                                      mbedtls_ssl_sig_alg_to_str(*sig_alg)));
+                MBEDTLS_SSL_DEBUG_RET(2, "mbedtls_pk_sign_ext", ret);
+
+            /* The signature failed. This is possible if the private key
+             * was not suitable for the signature operation as purposely we
+             * did not check its suitability completely. Let's try with
+             * another signature algorithm.
+             */
+                continue;
+            }
+        } else
+#endif
+        {
         /* Hash verify buffer with indicated hash function */
         psa_algorithm = mbedtls_md_psa_alg_from_type(md_alg);
         status = psa_hash_compute(psa_algorithm,
@@ -999,6 +1054,7 @@ static int ssl_tls13_write_certificate_verify_body(mbedtls_ssl_context *ssl,
              * another signature algorithm.
              */
             continue;
+        }
         }
 
         MBEDTLS_SSL_DEBUG_MSG(2, ("CertificateVerify signature with %s",

@@ -320,7 +320,22 @@ const size_t mbedtls_test_srv_crt_rsa_len =
 /*
  * Dispatch between RSA and EC
  */
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#include "test_certs_masq.h"
+#define TEST_CA_KEY TEST_CA_KEY_MASQ
+#define TEST_CA_CRT TEST_CA_CRT_MASQ
 
+#define TEST_SRV_KEY TEST_SRV_KEY_MASQ
+#define TEST_SRV_CRT TEST_SRV_CRT_MASQ
+
+#define TEST_CLI_KEY TEST_CLI_KEY_MASQ
+#define TEST_CLI_CRT TEST_CLI_CRT_MASQ
+
+#define TEST_CA_PWD ""
+#define TEST_SRV_PWD ""
+#define TEST_CLI_PWD ""
+
+#else
 #if defined(MBEDTLS_RSA_C)
 
 #define TEST_CA_KEY TEST_CA_KEY_RSA
@@ -349,6 +364,22 @@ const size_t mbedtls_test_srv_crt_rsa_len =
 #define TEST_CLI_PWD TEST_CLI_PWD_EC
 #define TEST_CLI_CRT TEST_CLI_CRT_EC
 #endif /* MBEDTLS_RSA_C */
+#endif
+const char mbedtls_test_ca_crt_masq[]  = TEST_CA_CRT_MASQ;
+const char mbedtls_test_srv_crt_masq[] = TEST_SRV_CRT_MASQ;
+const char mbedtls_test_cli_crt_masq[] = TEST_CLI_CRT_MASQ;
+
+const size_t mbedtls_test_ca_crt_masq_len = sizeof(mbedtls_test_ca_crt_masq);
+const size_t mbedtls_test_srv_crt_masq_len = sizeof(mbedtls_test_srv_crt_masq);
+const size_t mbedtls_test_cli_crt_masq_len = sizeof(mbedtls_test_cli_crt_masq);
+
+const char mbedtls_test_ca_key_masq[]  = TEST_CA_KEY_MASQ;
+const char mbedtls_test_srv_key_masq[] = TEST_SRV_KEY_MASQ;
+const char mbedtls_test_cli_key_masq[] = TEST_CLI_KEY_MASQ;
+
+const size_t mbedtls_test_ca_key_masq_len = sizeof(mbedtls_test_ca_key_masq);
+const size_t mbedtls_test_srv_key_masq_len = sizeof(mbedtls_test_srv_key_masq);
+const size_t mbedtls_test_cli_key_masq_len = sizeof(mbedtls_test_cli_key_masq);
 
 /* API stability forces us to declare
  *   mbedtls_test_{ca|srv|cli}_{key|pwd|crt}
@@ -406,6 +437,9 @@ const size_t mbedtls_test_cli_crt_len =
 
 /* List of CAs in PEM or DER, depending on config */
 const char *mbedtls_test_cas[] = {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    mbedtls_test_ca_crt_masq,
+#else
 #if defined(MBEDTLS_RSA_C) && defined(MBEDTLS_MD_CAN_SHA1)
     mbedtls_test_ca_crt_rsa_sha1,
 #endif
@@ -415,9 +449,13 @@ const char *mbedtls_test_cas[] = {
 #if defined(MBEDTLS_PK_CAN_ECDSA_SOME)
     mbedtls_test_ca_crt_ec,
 #endif
+#endif
     NULL
 };
 const size_t mbedtls_test_cas_len[] = {
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+    mbedtls_test_ca_crt_masq_len,
+#else
 #if defined(MBEDTLS_RSA_C) && defined(MBEDTLS_MD_CAN_SHA1)
     sizeof(mbedtls_test_ca_crt_rsa_sha1),
 #endif
@@ -426,6 +464,7 @@ const size_t mbedtls_test_cas_len[] = {
 #endif
 #if defined(MBEDTLS_PK_CAN_ECDSA_SOME)
     sizeof(mbedtls_test_ca_crt_ec),
+#endif
 #endif
     0
 };

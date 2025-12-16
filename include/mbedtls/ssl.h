@@ -253,6 +253,16 @@
 #define MBEDTLS_SSL_IANA_TLS_GROUP_FFDHE6144     0x0103
 #define MBEDTLS_SSL_IANA_TLS_GROUP_FFDHE8192     0x0104
 
+/* OQS Mlkem Groups */
+#define MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM512       512    // defined in oqsprov_capabilities.c
+#define MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM768       513
+#define MBEDTLS_SSL_OQS_TLS_GROUP_MLKEM1024      514
+
+/* QHPPKKEM Groups */
+#define MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM1        0x0400       // defined in qispace_prov.c
+#define MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM3        0x0401
+#define MBEDTLS_SSL_QP_TLS_GROUP_QHPPKKEM5        0x0402
+
 /*
  * TLS 1.3 Key Exchange Modes
  *
@@ -543,6 +553,14 @@
 /* LEGACY ALGORITHMS */
 #define MBEDTLS_TLS1_3_SIG_RSA_PKCS1_SHA1 0x0201
 #define MBEDTLS_TLS1_3_SIG_ECDSA_SHA1     0x0203
+
+#define MBEDTLS_TLS1_3_SIG_GHPPKDS1 0xaaa0    // defined in qispace_prov.c
+#define MBEDTLS_TLS1_3_SIG_GHPPKDS3 0xaaa1
+#define MBEDTLS_TLS1_3_SIG_GHPPKDS5 0xaaa2
+
+#define MBEDTLS_TLS1_3_SIG_MLDSA44 0x904    // defined in oqsprov_capabilities.c, they were 0xfea0, 0xfea3 and 0xfea5 before with old oqsprovider
+#define MBEDTLS_TLS1_3_SIG_MLDSA65 0x905
+#define MBEDTLS_TLS1_3_SIG_MLDSA87 0x906
 
 #define MBEDTLS_TLS1_3_SIG_NONE 0x0
 

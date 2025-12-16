@@ -1674,6 +1674,24 @@ usage:
                 sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_RSA_PKCS1_SHA1;
             } else if (strcmp(q, "ecdsa_sha1") == 0) {
                 sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_ECDSA_SHA1;
+#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
+#if defined(MBEDTLS_MASQ_PPK_C)
+            } else if (strcmp(q, "qghppkds1") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_GHPPKDS1;
+            } else if (strcmp(q, "qghppkds3") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_GHPPKDS3;
+            } else if (strcmp(q, "qghppkds5") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_GHPPKDS5;
+#endif
+#if defined(MBEDTLS_MASQ_ML_C)
+            } else if (strcmp(q, "mldsa44") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_MLDSA44;
+            } else if (strcmp(q, "mldsa65") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_MLDSA65;
+            } else if (strcmp(q, "mldsa87") == 0) {
+                sig_alg_list[i++] = MBEDTLS_TLS1_3_SIG_MLDSA87;
+#endif
+#endif
             } else {
                 ret = -1;
                 mbedtls_printf("unknown signature algorithm \"%s\"\n", q);
