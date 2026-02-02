@@ -46,6 +46,7 @@ qbn q_bn_init_r(void)
 {
     int ret = 0;
     qbn a = mbedtls_calloc(1, sizeof(mbedtls_mpi));
+    if(a == NULL) return NULL;
     mbedtls_mpi_init((mbedtls_mpi *)a);
     ret = mbedtls_mpi_lset((mbedtls_mpi *)a, (mbedtls_mpi_sint)0);
     if (ret == 0) {
@@ -61,6 +62,7 @@ qbn q_bn_init_with_int_r(int b)
 {
     int ret = 0;
     qbn a = mbedtls_calloc(1, sizeof(mbedtls_mpi));
+    if(a == NULL) return NULL;
     mbedtls_mpi_init((mbedtls_mpi *)a);
     ret = mbedtls_mpi_lset((mbedtls_mpi *)a, (mbedtls_mpi_sint)b);
     if (ret == 0) {
@@ -76,6 +78,7 @@ qbn q_bn_init_p_r(const char* b, int radix)
 {
     int ret = 0;
     qbn a = mbedtls_calloc(1, sizeof(mbedtls_mpi));
+    if(a == NULL) return NULL;
     mbedtls_mpi_init((mbedtls_mpi *)a);
     ret = mbedtls_mpi_read_string((mbedtls_mpi *)a, radix, b);
     if (ret == 0) {
@@ -126,6 +129,7 @@ int q_bn_mod_pow(qbn a, qbn base, int i, qbn mod)
 {
     int ret = 0;
     qbn exp = mbedtls_calloc(1, sizeof(mbedtls_mpi));
+    if(exp == NULL) return -1;
     mbedtls_mpi_init((mbedtls_mpi *)exp);
     ret = mbedtls_mpi_lset((mbedtls_mpi *)exp, (mbedtls_mpi_sint)i);
     if(ret == 0) {
@@ -174,6 +178,7 @@ int q_bn_mul_mod(qbn a, qbn op1, qbn op2, qbn p)
 {
     int ret = 0;
     qbn x = mbedtls_calloc(1, sizeof(mbedtls_mpi));
+    if(x == NULL) return -1;
     mbedtls_mpi_init((mbedtls_mpi *)x);
     ret = mbedtls_mpi_mul_mpi((mbedtls_mpi *)x, (const mbedtls_mpi *)op1, (const mbedtls_mpi *)op2);
     if (ret != 0) {
@@ -310,6 +315,7 @@ int q_masq_bn_random_modp(qbn a, qbn p, int size, MASQ_rand_callback_t rand_cf, 
     int32_t ret = 0;
     unsigned char *arr;
     arr = mbedtls_calloc(1, size);
+    if(arr == NULL) return -1;
 
     memset(arr, 0, size);
 
@@ -423,28 +429,40 @@ int q_masq_ppk_gen_session_key(uint8_t *ss, int ss_size, MASQ_rand_callback_t ra
 
 int q_masq_ppk_calc_k(qbn a, qbn b, qbn p, qbn K) {
 
+    int ret = 0;
     qbn helper_0;
     q_bn_init(helper_0);
-    q_bn_mod_inverse(helper_0, a, p);
-    q_masq_bn_mul_mod(K, b, helper_0, p);
+    ret = q_bn_mod_inverse(helper_0, a, p);
+    if (ret < 0) return ret;
+    ret = q_masq_bn_mul_mod(K, b, helper_0, p);
+    if (ret < 0) return ret;
     q_bn_clear(helper_0);
-    return 0;
+    return ret;
 }
 
 int q_masq_ppk_calc_linear_session_key(qbn K, qbn h0, qbn p, qbn f0, qbn hL, qbn fL, qbn session_key) {
 
+    int ret = 0;
     qbn helper_0;
     q_bn_init(helper_0);
-    q_masq_bn_mul_mod(helper_0, K, h0, p);
-    q_bn_subtract(helper_0, helper_0, f0);
-    q_bn_mod(session_key, helper_0, p);
-    q_masq_bn_mul_mod(helper_0, K, hL, p);
-    q_bn_subtract(helper_0, fL, helper_0);
-    q_bn_mod(helper_0, helper_0, p);
-    q_bn_mod_inverse(helper_0, helper_0, p);
-    q_masq_bn_mul_mod(session_key, session_key, helper_0, p);
+    ret = q_masq_bn_mul_mod(helper_0, K, h0, p);
+    if (ret < 0) return ret;
+    ret = q_bn_subtract(helper_0, helper_0, f0);
+    if (ret < 0) return ret;
+    ret = q_bn_mod(session_key, helper_0, p);
+    if (ret < 0) return ret;
+    ret = q_masq_bn_mul_mod(helper_0, K, hL, p);
+    if (ret < 0) return ret;
+    ret = q_bn_subtract(helper_0, fL, helper_0);
+    if (ret < 0) return ret;
+    ret = q_bn_mod(helper_0, helper_0, p);
+    if (ret < 0) return ret;
+    ret = q_bn_mod_inverse(helper_0, helper_0, p);
+    if (ret < 0) return ret;
+    ret = q_masq_bn_mul_mod(session_key, session_key, helper_0, p);
+    if (ret < 0) return ret;
     q_bn_clear(helper_0);
-    return 0;
+    return ret;
 }
 
 uint32_t q_masq_ppk_crc32(uint8_t *message, int32_t len) {
@@ -546,6 +564,7 @@ int q_bn_divide_int(qbn a, qbn b, int c)
 {
     int ret = 0;
     qbn d = mbedtls_calloc(1, sizeof(mbedtls_mpi));
+    if(d == NULL) return -1;
     mbedtls_mpi_init((mbedtls_mpi *)d);
     ret = mbedtls_mpi_div_int((mbedtls_mpi *)a, (mbedtls_mpi *)d, (mbedtls_mpi *)b, (mbedtls_mpi_sint)c);
     mbedtls_mpi_free((mbedtls_mpi *)d);
