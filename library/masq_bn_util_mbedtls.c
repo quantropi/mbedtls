@@ -572,12 +572,13 @@ int q_bn_divide_int(qbn a, qbn b, int c)
     return ret;
 }
 
-
+#if 0
 // ONLY USED FOR TEST PURPOSE
 int q_bn_printf(char *text, qbn value) {
     mbedtls_printf("%s:", text);
     mbedtls_mpi_write_file(NULL, (mbedtls_mpi *) value, 16, NULL);
     return 0;
 }
+#endif
 
 #endif
