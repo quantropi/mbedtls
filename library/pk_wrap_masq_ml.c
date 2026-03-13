@@ -88,7 +88,7 @@ static int masqds_verify_wrap(mbedtls_pk_context *pk, mbedtls_md_type_t md_alg,
     UNUSED(md_alg);
 
     ret = MASQ_DS_verify((MASQ_DS_handle *)(ctx->handle), (uint8_t *)(ctx->pubkey), (uint8_t *)msg, msg_len, (uint8_t *)sig, (int32_t)sig_len, NULL, 0);
-    MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML_dsa verify...ret:%d\n", ret);
+    //MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML_dsa verify...ret:%d\n", ret);
 
     return ret;
 }
@@ -116,7 +116,7 @@ static int masqds_sign_wrap(mbedtls_pk_context *pk, mbedtls_md_type_t md_alg,
     MASQ_DS_seed((MASQ_DS_handle *)(ctx->handle), seed_orig, DS_SEED_LEN);    
 
     ret = MASQ_DS_sign((MASQ_DS_handle *)(ctx->handle), (uint8_t *)(ctx->prikey), (uint8_t *)msg, msg_len, (uint8_t *)sig, (int32_t *)sig_len, NULL, 0);
-    MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML_dsa sign...ret:%d\n", ret);
+    //MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML_dsa sign...ret:%d\n", ret);
 
     return ret;
 }
@@ -130,7 +130,7 @@ static void *masqds_alloc_wrap(MASQ_DS_LEVEL level)
     if (q_ctx == NULL)  return NULL;
 
     ds_handle = MASQ_DS_init(level, (MASQ_rand_callback_t)masqds_rand_cf, (MASQ_rand_seed_callback_t)masqds_rand_seed_cf, (MASQ_RAND_handle)seed_hdl_ml);
-    MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML_dsa init...ret handle:%p\n", ds_handle);
+    //MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML_dsa init...ret handle:%p\n", ds_handle);
     if (ds_handle == NULL) {
         mbedtls_free(q_ctx);
         return NULL;
