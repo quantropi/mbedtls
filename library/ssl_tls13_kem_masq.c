@@ -69,7 +69,7 @@ int masqkem_decaps(uint8_t *shared_secret, mbedtls_ssl_handshake_params *handsha
 #if defined(MBEDTLS_MASQ_ML_C)
     if (handshake->qpkem_type == 0)
         ret = masq_kem_mlkem_decaps(handshake->qpkem_handle, handshake->qpkem_privkey, handshake->qpkem_peerkey, shared_secret);
-    MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML kem decap...ret:%d\n", ret);
+    //MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML kem decap...ret:%d\n", ret);
 #endif
 
     return ret;
@@ -85,7 +85,7 @@ static int masqkem_encaps(mbedtls_ssl_handshake_params *handshake, uint8_t *outp
 #if defined(MBEDTLS_MASQ_ML_C)
     if (handshake->qpkem_type == 0)
         ret = masq_kem_mlkem_encaps(handshake->qpkem_handle, handshake->qpkem_peerkey, handshake->qpkem_shared_secret, output);
-    MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML kem encap...ret=%d\n",ret);
+    //MBEDTLS_SSL_DEBUG_MSG_MASQ("  . ML kem encap...ret=%d\n",ret);
 #endif
 
     return ret;
@@ -141,7 +141,7 @@ static int  masqkem_generate_key(mbedtls_ssl_handshake_params *handshake, uint16
         default:
             return 1;
     }
-    MBEDTLS_SSL_DEBUG_MSG_MASQ("  . MASQ kem init (%x) ret handle:%p\n", named_group, kem_handle);
+    //MBEDTLS_SSL_DEBUG_MSG_MASQ("  . MASQ kem init (%x) ret handle:%p\n", named_group, kem_handle);
 
     if (kem_handle == NULL) {
         return 1;
