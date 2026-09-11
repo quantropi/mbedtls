@@ -2036,21 +2036,21 @@ int query_config(const char *config)
     }
 #endif /* MBEDTLS_RSA_C */
 
-#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
-    if( strcmp( "MBEDTLS_MASQKEM_C", config ) == 0 )
+#if defined(MBEDTLS_MASQ_PPK_C)
+    if( strcmp( "MBEDTLS_MASQ_PPK_C", config ) == 0 )
     {
-        MACRO_EXPANSION_TO_STR( MBEDTLS_MASQKEM_C );
+        MACRO_EXPANSION_TO_STR( MBEDTLS_MASQ_PPK_C );
         return( 0 );
     }
-#endif /* MBEDTLS_MASQKEM_C */
+#endif /* MBEDTLS_MASQ_PPK_C */
 
-#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
-    if( strcmp( "MBEDTLS_MASQDS_C", config ) == 0 )
+#if defined(MBEDTLS_MASQ_ML_C)
+    if( strcmp( "MBEDTLS_MASQ_ML_C", config ) == 0 )
     {
-        MACRO_EXPANSION_TO_STR( MBEDTLS_MASQDS_C );
+        MACRO_EXPANSION_TO_STR( MBEDTLS_MASQ_ML_C );
         return( 0 );
     }
-#endif /* MBEDTLS_MASQDS_C */
+#endif /* MBEDTLS_MASQ_ML_C */
 
 #if defined(MBEDTLS_SHA1_C)
     if( strcmp( "MBEDTLS_SHA1_C", config ) == 0 )
@@ -4534,13 +4534,13 @@ void list_config(void)
     OUTPUT_MACRO_NAME_VALUE(MBEDTLS_RSA_C);
 #endif /* MBEDTLS_RSA_C */
 
-#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
-    OUTPUT_MACRO_NAME_VALUE(MBEDTLS_MASQKEM_C);
-#endif /* MBEDTLS_MASQKEM_C */
+#if defined(MBEDTLS_MASQ_PPK_C)
+    OUTPUT_MACRO_NAME_VALUE(MBEDTLS_MASQ_PPK_C);
+#endif /* MBEDTLS_MASQ_PPK_C */
 
-#if defined(MBEDTLS_MASQ_PPK_C) || defined(MBEDTLS_MASQ_ML_C)
-    OUTPUT_MACRO_NAME_VALUE(MBEDTLS_MASQDS_C);
-#endif /* MBEDTLS_MASQDS_C */
+#if defined(MBEDTLS_MASQ_ML_C)
+    OUTPUT_MACRO_NAME_VALUE(MBEDTLS_MASQ_ML_C);
+#endif /* MBEDTLS_MASQ_ML_C */
 
 #if defined(MBEDTLS_SHA1_C)
     OUTPUT_MACRO_NAME_VALUE(MBEDTLS_SHA1_C);
